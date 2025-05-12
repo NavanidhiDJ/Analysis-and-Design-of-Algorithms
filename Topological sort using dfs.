@@ -1,0 +1,94 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+// Function to check if the stack is empty
+int isEmpty(int top) {
+    return top == -1;
+}
+
+// Function to push an element onto the stack
+void push(int stack[], int *top, int value, int max) {
+    if (*top == max - 1) {
+        printf("Stack overflow\n");
+        return;
+    }
+    stack[++(*top)] = value;
+}
+
+// Function to pop an element from the stack
+int pop(int stack[], int *top) {
+    if (isEmpty(*top)) {
+        printf("Stack underflow\n");
+        return -1;
+    }
+    return stack[(*top)--];
+}
+
+// Function to perform DFS for topological sorting
+void dfs(int v, int **adj, int *visited, int *stack, int *top, int n, int max) {
+    visited[v] = 1;
+    for (int i = 0; i < n; i++) {
+        if (adj[v][i] == 1 && !visited[i]) {
+            dfs(i, adj, visited, stack, top, n, max);
+        }
+    }
+    push(stack, top, v, max);
+}
+
+// Function to perform topological sorting using DFS
+void topologicalSort(int n, int **adj, int max) {
+    int visited[max];
+    int stack[max];
+    int top = -1;
+
+    for (int i = 0; i < max; i++)
+        visited[i] = 0;
+
+    // Perform DFS on all unvisited nodes
+    for (int i = 0; i < n; i++) {
+        if (!visited[i]) {
+            dfs(i, adj, visited, stack, &top, n, max);
+        }
+    }
+
+    // Print topological order
+    printf("Topological Order: ");
+    while (!isEmpty(top)) {
+        printf("%d ", pop(stack, &top));
+    }
+    printf("\n");
+}
+
+int main() {
+    int n, e;
+    printf("Enter the number of vertices: ");
+    scanf("%d", &n);
+    printf("Enter the number of edges: ");
+    scanf("%d", &e);
+
+    int **adj = (int **)malloc(n * sizeof(int *));
+    for (int i = 0; i < n; i++) {
+        adj[i] = (int *)malloc(n * sizeof(int));
+        for (int j = 0; j < n; j++) {
+            adj[i][j] = 0;
+        }
+    }
+
+    printf("Enter the edges (u v) where u -> v: \n");
+    for (int i = 0; i < e; i++) {
+        int u, v;
+        scanf("%d %d", &u, &v);
+        adj[u][v] = 1;
+    }
+
+    // Perform topological sorting
+    topologicalSort(n, adj, n);
+
+    // Free allocated memory
+    for (int i = 0; i < n; i++) {
+        free(adj[i]);
+    }
+    free(adj);
+
+    return 0;
+}
