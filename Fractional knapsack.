@@ -1,43 +1,53 @@
 #include <stdio.h>
 
-struct Item {
-    int weight, value;
-};
+void fractionalKnapsack(int n, int W, int weight[], int value[]) {
+    float ratio[n], temp;
+    int i, j;
+    int used[n];
+    float totalProfit = 0.0;
 
-void sortItems(struct Item arr[], int n) {
-    for (int i = 0; i < n - 1; i++) {
-        for (int j = i + 1; j < n; j++) {
-            double r1 = (double)arr[i].value / arr[i].weight;
-            double r2 = (double)arr[j].value / arr[j].weight;
-            if (r1 < r2) {
-                struct Item temp = arr[i];
-                arr[i] = arr[j];
-                arr[j] = temp;
+    for (i = 0; i < n; i++) {
+        ratio[i] = (float)value[i] / weight[i];
+        used[i] = 0;
+    }
+
+    for (i = 0; i < n; i++) {
+        for (j = i + 1; j < n; j++) {
+            if (ratio[i] < ratio[j]) {
+                temp = ratio[i]; ratio[i] = ratio[j]; ratio[j] = temp;
+
+                int t = value[i]; value[i] = value[j]; value[j] = t;
+                t = weight[i]; weight[i] = weight[j]; weight[j] = t;
             }
         }
     }
-}
 
-double fractionalKnapsack(int W, struct Item arr[], int n) {
-    sortItems(arr, n);
-    double totalValue = 0.0;
-    for (int i = 0; i < n; i++) {
-        if (arr[i].weight <= W) {
-            W -= arr[i].weight;
-            totalValue += arr[i].value;
+    for (i = 0; i < n; i++) {
+        if (weight[i] <= W) {
+            W -= weight[i];
+            totalProfit += value[i];
+            used[i] = 1;
         } else {
-            totalValue += arr[i].value * ((double)W / arr[i].weight);
+            totalProfit += ratio[i] * W;
+            used[i] = 2;
             break;
         }
     }
-    return totalValue;
+
+    printf("Total profit = %.2f\n", totalProfit);
+    printf("Items used (1=full, 2=partial):\n");
+    for (i = 0; i < n; i++) {
+        printf("Item %d: %d\n", i + 1, used[i]);
+    }
 }
 
 int main() {
-    struct Item items[] = {{10, 60}, {20, 100}, {30, 120}};
+    int value[] = {60, 100, 120};
+    int weight[] = {10, 20, 30};
     int W = 50;
-    int n = sizeof(items) / sizeof(items[0]);
-    double maxValue = fractionalKnapsack(W, items, n);
-    printf("Maximum value in Knapsack = %.2f\n", maxValue);
+    int n = sizeof(value) / sizeof(value[0]);
+
+    fractionalKnapsack(n, W, weight, value);
+
     return 0;
 }
